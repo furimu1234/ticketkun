@@ -1,0 +1,26 @@
+{
+  "name": "@example_build/db",
+  "private": true,
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc --noEmit -p .",
+    "generate": "drizzle-kit generate --name=example_build",
+    "migrate": "drizzle-kit migrate",
+    "drizzle": "drizzle-kit",
+    "dbInit": "tsx src/init.ts && pnpm generate"
+  },
+  "dependencies": {
+    "drizzle-kit": "^0.31.0",
+    "drizzle-orm": "^0.43.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
