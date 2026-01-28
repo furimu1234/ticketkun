@@ -5,12 +5,16 @@
 ├── node_modules
 │   ├── @biomejs
 │   │   └── biome -> ../.pnpm/@biomejs+biome@2.3.8/node_modules/@biomejs/biome
-│   └── dotenv -> .pnpm/dotenv@17.2.3/node_modules/dotenv
+│   ├── discord.js -> .pnpm/discord.js@14.25.1/node_modules/discord.js
+│   ├── dotenv -> .pnpm/dotenv@17.2.3/node_modules/dotenv
+│   ├── drizzle-orm -> .pnpm/drizzle-orm@0.43.1_@types+pg@8.15.6_pg@8.16.3/node_modules/drizzle-orm
+│   └── zod -> .pnpm/zod@4.3.5/node_modules/zod
 ├── package.json
 ├── packages
 │   ├── bot
 │   │   ├── dist
 │   │   │   ├── commands
+│   │   │   │   ├── createTicketInfo.js
 │   │   │   │   ├── main.js
 │   │   │   │   └── welcomeMessage.js
 │   │   │   ├── container.js
@@ -23,12 +27,11 @@
 │   │   │       ├── env.js
 │   │   │       └── registerCommands.js
 │   │   ├── node_modules
-│   │   │   ├── @example_build
-│   │   │   │   └── db -> ../../../db
+│   │   │   ├── @ticket
+│   │   │   │   ├── db -> ../../../db
+│   │   │   │   └── lib -> ../../../lib
 │   │   │   ├── @types
 │   │   │   │   └── pg -> ../../../../node_modules/.pnpm/@types+pg@8.15.6/node_modules/@types/pg
-│   │   │   ├── discord.js -> ../../../node_modules/.pnpm/discord.js@14.25.1/node_modules/discord.js
-│   │   │   ├── drizzle-orm -> ../../../node_modules/.pnpm/drizzle-orm@0.43.1_@types+pg@8.15.6_pg@8.16.3/node_modules/drizzle-orm
 │   │   │   ├── pg -> ../../../node_modules/.pnpm/pg@8.16.3/node_modules/pg
 │   │   │   ├── pino -> ../../../node_modules/.pnpm/pino@9.14.0/node_modules/pino
 │   │   │   ├── pino-pretty -> ../../../node_modules/.pnpm/pino-pretty@13.1.3/node_modules/pino-pretty
@@ -36,8 +39,8 @@
 │   │   ├── package.json
 │   │   ├── src
 │   │   │   ├── commands
-│   │   │   │   ├── main.ts
-│   │   │   │   └── welcomeMessage.ts
+│   │   │   │   ├── createTicketInfo.ts
+│   │   │   │   └── main.ts
 │   │   │   ├── container.ts
 │   │   │   ├── events
 │   │   │   │   └── commands.ts
@@ -48,45 +51,129 @@
 │   │   │       ├── env.ts
 │   │   │       └── registerCommands.ts
 │   │   └── tsconfig.json
-│   └── db
+│   ├── db
+│   │   ├── dist
+│   │   │   ├── client.d.ts
+│   │   │   ├── client.js
+│   │   │   ├── client.js.map
+│   │   │   ├── funcs
+│   │   │   │   ├── createTicketInfo.d.ts
+│   │   │   │   ├── createTicketInfo.js
+│   │   │   │   ├── createTicketInfo.js.map
+│   │   │   │   ├── getTicketinfo.d.ts
+│   │   │   │   ├── getTicketinfo.js
+│   │   │   │   ├── getTicketinfo.js.map
+│   │   │   │   ├── getWelcomeMessage.d.ts
+│   │   │   │   ├── getWelcomeMessage.js
+│   │   │   │   ├── getWelcomeMessage.js.map
+│   │   │   │   ├── index.d.ts
+│   │   │   │   ├── index.js
+│   │   │   │   ├── index.js.map
+│   │   │   │   ├── updateTicketinfo.d.ts
+│   │   │   │   ├── updateTicketinfo.js
+│   │   │   │   ├── updateTicketinfo.js.map
+│   │   │   │   ├── utils.d.ts
+│   │   │   │   ├── utils.js
+│   │   │   │   └── utils.js.map
+│   │   │   ├── handmeid.d.ts
+│   │   │   ├── handmeid.js
+│   │   │   ├── handmeid.js.map
+│   │   │   ├── index.d.ts
+│   │   │   ├── index.js
+│   │   │   ├── index.js.map
+│   │   │   ├── schema.d.ts
+│   │   │   ├── schema.js
+│   │   │   └── schema.js.map
+│   │   ├── drizzle
+│   │   │   ├── 0000_example_build.sql
+│   │   │   └── meta
+│   │   │       ├── 0000_snapshot.json
+│   │   │       └── _journal.json
+│   │   ├── drizzle.config.ts
+│   │   ├── node_modules
+│   │   │   ├── @ticket
+│   │   │   │   └── lib -> ../../../lib
+│   │   │   ├── drizzle-kit -> ../../../node_modules/.pnpm/drizzle-kit@0.31.8/node_modules/drizzle-kit
+│   │   │   ├── drizzle-orm -> ../../../node_modules/.pnpm/drizzle-orm@0.43.1_@types+pg@8.15.6_pg@8.16.3/node_modules/drizzle-orm
+│   │   │   └── typescript -> ../../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript
+│   │   ├── package.json
+│   │   ├── src
+│   │   │   ├── client.ts
+│   │   │   ├── funcs
+│   │   │   │   ├── createTicketInfo.ts
+│   │   │   │   ├── getTicketinfo.ts
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── updateTicketinfo.ts
+│   │   │   │   └── utils.ts
+│   │   │   ├── handmeid.ts
+│   │   │   ├── index.ts
+│   │   │   └── schema.ts
+│   │   └── tsconfig.json
+│   └── lib
 │       ├── dist
-│       │   ├── client.d.ts
-│       │   ├── client.js
-│       │   ├── client.js.map
-│       │   ├── funcs
-│       │   │   ├── getWelcomeMessage.d.ts
-│       │   │   ├── getWelcomeMessage.js
-│       │   │   ├── getWelcomeMessage.js.map
+│       │   ├── confirm.d.ts
+│       │   ├── confirm.js
+│       │   ├── confirm.js.map
+│       │   ├── consts.d.ts
+│       │   ├── consts.js
+│       │   ├── consts.js.map
+│       │   ├── dialog.d.ts
+│       │   ├── dialog.js
+│       │   ├── dialog.js.map
+│       │   ├── errors.d.ts
+│       │   ├── errors.js
+│       │   ├── errors.js.map
+│       │   ├── externals
+│       │   │   ├── discord
+│       │   │   │   ├── index.d.ts
+│       │   │   │   ├── index.js
+│       │   │   │   ├── index.js.map
+│       │   │   │   ├── member.d.ts
+│       │   │   │   ├── member.js
+│       │   │   │   ├── member.js.map
+│       │   │   │   ├── send.d.ts
+│       │   │   │   ├── send.js
+│       │   │   │   └── send.js.map
 │       │   │   ├── index.d.ts
 │       │   │   ├── index.js
 │       │   │   └── index.js.map
 │       │   ├── index.d.ts
 │       │   ├── index.js
 │       │   ├── index.js.map
-│       │   ├── schema.d.ts
-│       │   ├── schema.js
-│       │   └── schema.js.map
-│       ├── drizzle
-│       │   ├── 0000_example_build.sql
-│       │   └── meta
-│       │       ├── 0000_snapshot.json
-│       │       └── _journal.json
-│       ├── drizzle.config.ts
+│       │   ├── messages.d.ts
+│       │   ├── messages.js
+│       │   ├── messages.js.map
+│       │   ├── random.d.ts
+│       │   ├── random.js
+│       │   ├── random.js.map
+│       │   ├── selector.d.ts
+│       │   ├── selector.js
+│       │   ├── selector.js.map
+│       │   ├── wrap.d.ts
+│       │   ├── wrap.js
+│       │   └── wrap.js.map
 │       ├── node_modules
-│       │   ├── drizzle-kit -> ../../../node_modules/.pnpm/drizzle-kit@0.31.8/node_modules/drizzle-kit
-│       │   ├── drizzle-orm -> ../../../node_modules/.pnpm/drizzle-orm@0.43.1_@types+pg@8.15.6_pg@8.16.3/node_modules/drizzle-orm
 │       │   └── typescript -> ../../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript
 │       ├── package.json
 │       ├── src
-│       │   ├── client.ts
-│       │   ├── funcs
-│       │   │   ├── getWelcomeMessage.ts
+│       │   ├── confirm.ts
+│       │   ├── consts.ts
+│       │   ├── dialog.ts
+│       │   ├── errors.ts
+│       │   ├── externals
+│       │   │   ├── discord
+│       │   │   │   ├── index.ts
+│       │   │   │   ├── member.ts
+│       │   │   │   └── send.ts
 │       │   │   └── index.ts
 │       │   ├── index.ts
-│       │   └── schema.ts
+│       │   ├── messages.ts
+│       │   ├── random.ts
+│       │   ├── selector.ts
+│       │   └── wrap.ts
 │       └── tsconfig.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
 └── tree.txt
 
-37 directories, 53 files
+50 directories, 127 files

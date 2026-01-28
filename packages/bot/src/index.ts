@@ -1,11 +1,12 @@
 import * as path from 'node:path';
-import { schema } from '@example_build/db';
+import { schema } from '@ticket/db';
 import { type Client, Events } from 'discord.js';
+
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
 import { loadCommands } from './commands/main';
-import { botClient, Container, container } from './container';
+import { botClient } from './container';
 import { loadEvents } from './loadEvents';
 import { getEnv } from './utils/env';
 import { slashCommandRegister } from './utils/registerCommands';
@@ -22,9 +23,6 @@ botClient.once(Events.ClientReady, async (c) => {
 
 	slashCommandRegister(botClient.user, commands);
 });
-
-// 起動に十分な最小構築
-container.current = Container();
 
 export const runClient = async (client: Client) => {
 	const pool = new Pool({

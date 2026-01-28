@@ -1,51 +1,150 @@
 {
-  "id": "9065e490-f5a0-4847-944f-7a4e0b2019fd",
+  "id": "65dcd6de-6bd2-4b22-97df-85f201a7d8ed",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "build_example.welcome_message": {
-      "name": "welcome_message",
-      "schema": "build_example",
+    "public.ticket": {
+      "name": "ticket",
+      "schema": "",
       "columns": {
-        "server_id": {
-          "name": "server_id",
+        "panel_id": {
+          "name": "panel_id",
           "type": "varchar(19)",
           "primaryKey": true,
           "notNull": true
         },
-        "message": {
-          "name": "message",
-          "type": "text",
+        "first_messages": {
+          "name": "first_messages",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'{\"content\":\"[クローズ]ボタンを押してこのスレッドをクローズできます!\",\"embeds\":[{\"description\":\"トラブルやBOTの不具合を報告してください!\"}],\"rows\":{\"version\":1,\"components\":[[{\"customId\":\"close\",\"label\":\"クローズ\",\"emoji\":\"<:ai_chime:1465619293961195664>\",\"type\":\"button\",\"style\":4}]]}}'::jsonb"
+        },
+        "process": {
+          "name": "process",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{\"1\":{\"name\":\"button\",\"Id\":\"close\",\"actionIndex\":[2]},\"2\":{\"name\":\"message\",\"message\":{\"content\":\"クローズしますか？\",\"rows\":{\"version\":1,\"components\":[[{\"type\":\"button\",\"customId\":\"custom_exeClose\",\"label\":\"CLOSE\",\"emoji\":\"<:ai_chime:1465619293961195664>\",\"style\":4}]]}}},\"3\":{\"name\":\"button\",\"Id\":\"custom_exeClose\",\"actionIndex\":[4,5,6]},\"4\":{\"name\":\"ignoreMembers\",\"roles\":[],\"users\":[]},\"5\":{\"name\":\"closeThread\",\"ignore\":[]},\"6\":{\"name\":\"message\",\"message\":{\"content\":\"クローズしました!\",\"rows\":{\"version\":1,\"components\":[[{\"type\":\"button\",\"label\":\"再OPEN\",\"customId\":\"custom_reopen\",\"style\":3,\"emoji\":\"<:ai_open_letter:1465990917373694126>\"}]]}}}}'::jsonb"
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         }
       },
       "indexes": {
-        "welcome_message_server_id": {
-          "name": "welcome_message_server_id",
+        "close_panel_panel_id_idx": {
+          "name": "close_panel_panel_id_idx",
           "columns": [
             {
-              "expression": "server_id",
+              "expression": "panel_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             }
           ],
           "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ticket_info": {
+      "name": "ticket_info",
+      "schema": "",
+      "columns": {
+        "server_id": {
+          "name": "server_id",
+          "type": "varchar(19)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "channel_id": {
+          "name": "channel_id",
+          "type": "varchar(19)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "panel_id": {
+          "name": "panel_id",
+          "type": "varchar(19)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "send_close_panel_timing": {
+          "name": "send_close_panel_timing",
+          "type": "char(1)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'1'"
+        },
+        "main_panel": {
+          "name": "main_panel",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{\"content\":\"[クローズ]ボタンを押してこのスレッドをクローズできます!\",\"embeds\":[{\"description\":\"トラブルやBOTの不具合を報告してください!\"}],\"rows\":{\"version\":1,\"components\":[[{\"customId\":\"ticket_start\",\"label\":\"お問い合わせ作成\",\"emoji\":\"<:ai_open_letter:1465990917373694126>\",\"type\":\"button\",\"style\":3}]]}}'::jsonb"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "ticket_info_panel_id_idx": {
+          "name": "ticket_info_panel_id_idx",
+          "columns": [
+            {
+              "expression": "panel_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ticket_info_panel_id_uniq": {
+          "name": "ticket_info_panel_id_uniq",
+          "columns": [
+            {
+              "expression": "panel_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
           "concurrently": false,
           "method": "btree",
           "with": {}

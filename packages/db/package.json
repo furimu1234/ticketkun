@@ -1,5 +1,5 @@
 {
-  "name": "@example_build/db",
+  "name": "@ticket/db",
   "private": true,
   "type": "commonjs",
   "main": "dist/index.js",
@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "drizzle-kit": "^0.31.0",
-    "drizzle-orm": "^0.43.1"
+    "drizzle-orm": "^0.43.1",
+    "@ticket/lib": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

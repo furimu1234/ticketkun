@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.13/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -19,6 +19,7 @@
     "enabled": true,
     "indentStyle": "tab"
   },
+
   "linter": {
     "enabled": true,
     "rules": {
@@ -47,6 +48,7 @@
       "unsafeParameterDecoratorsEnabled": true
     }
   },
+
   "json": {
     "parser": {
       "allowComments": true

@@ -1,9 +1,9 @@
-import { MakeDataStore, schema } from '@example_build/db';
+import { MakeDataStore, schema } from '@ticket/db';
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import * as dotenv from 'dotenv';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import type { ContainerRef, IContainer } from './types';
+import type { IContainer } from './types';
 
 dotenv.config({ path: '../../.env' });
 
@@ -21,12 +21,16 @@ export const Container = (): IContainer => {
 		return dataStore;
 	};
 
+	// const getEditPanelStore = () => {
+	// 	return editPanelMap();
+	// };
+
 	return {
 		getDataStore,
 	};
 };
 
-export const container: ContainerRef = { current: Container() };
+export const container: IContainer = Container();
 
 export const botClient = new Client({
 	intents: [
