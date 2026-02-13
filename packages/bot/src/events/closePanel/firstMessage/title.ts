@@ -1,12 +1,8 @@
 import * as path from 'node:path';
-
-import {
-	type DiscordMessageEmbedType,
-	getTicketInfo,
-	updateTicketInfo,
-} from '@ticket/db';
+import { getTicket, updateTicket } from '@ticket/db';
 import {
 	confirmDialog,
+	DISCORD_MESSAGE_LIMITS,
 	Dialog,
 	generateRandomString,
 	messageID,
@@ -21,10 +17,10 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
-
-import { makeEditClosePanel } from '../../commands/createTicketInfo';
-import { container } from '../../container';
-import { editPanelStore } from '../../utils';
+import { container } from '../../../container';
+import { makeEditCloseFirstMessage } from '../../../settingPanel';
+import { editPanelStore } from '../../../utils';
+import { checkPanelName } from './content';
 
 export const name = Events.InteractionCreate;
 export const once = false;
@@ -53,22 +49,24 @@ const main = async (interaction: ButtonInteraction) => {
 	);
 	if (!panelId) throw new SendError(messageID.E00003());
 
-	const model = await store.do(async (db) => {
-		const model = await getTicketInfo(db, panelId);
+	await store.do(async (db) => {
+		const model = await getTicket(db, panelId);
 
 		if (!model) throw new SendError(messageID.E00001());
 
 		const dialog = Dialog();
 
-		const newContentCustomId = generateRandomString();
+		const newItemCustomId = generateRandomString();
+
+		if (!model.firstMessages.embeds) return;
 
 		const label = new LabelBuilder()
-			.setLabel('新しい付属文を入力してください!')
+			.setLabel('新しいタイトルを入力してください!')
 			.setTextInputComponent(
 				new TextInputBuilder()
-					.setCustomId(newContentCustomId)
-					.setValue(model.firstMessages.content ?? '')
-					.setMaxLength(2000)
+					.setCustomId(newItemCustomId)
+					.setValue(model.firstMessages.embeds[0].title ?? '')
+					.setMaxLength(DISCORD_MESSAGE_LIMITS.title)
 					.setStyle(TextInputStyle.Paragraph)
 					.setRequired(false),
 			);
@@ -81,10 +79,12 @@ const main = async (interaction: ButtonInteraction) => {
 					builder: label,
 				},
 			],
-			title: '付属文入力画面',
+			title: 'タイトル入力画面',
 		});
 
-		model.firstMessages.content = modalR.getTextInputValue(newContentCustomId);
+		model.firstMessages.embeds[0].title =
+			modalR.getTextInputValue(newItemCustomId);
+
 		checkPanelName(model.firstMessages.content, model.firstMessages.embeds);
 
 		if (model.firstMessages.rows?.version === 2) {
@@ -105,13 +105,13 @@ const main = async (interaction: ButtonInteraction) => {
 			}
 		}
 
-		await updateTicketInfo(db, model, panelId);
+		await updateTicket(db, model, panelId);
 		return model;
 	});
 
 	if (!interaction.channel?.isSendable()) return;
 
-	await makeEditClosePanel(model, interaction.channel);
+	await makeEditCloseFirstMessage(panelId, interaction.channel);
 
 	await sendMessageThenDelete(
 		{
@@ -120,15 +120,4 @@ const main = async (interaction: ButtonInteraction) => {
 		},
 		interaction,
 	);
-};
-
-export const checkPanelName = (
-	content?: string,
-	embeds: DiscordMessageEmbedType[] = [],
-) => {
-	if (!content && embeds.length !== 0 && !embeds[0].title) {
-		throw new SendError(messageID.E00005());
-	}
-
-	return true;
 };

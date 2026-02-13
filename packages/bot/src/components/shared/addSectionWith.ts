@@ -2,7 +2,7 @@ import { ButtonBuilder, ButtonStyle, SectionBuilder } from 'discord.js';
 import { addTextDisplayBuilder } from './addTextDisplay';
 
 interface sectionWithButtonType {
-	contents: string[];
+	contents: string;
 	buttonCustomId: string;
 	buttonLabel: string;
 	buttonStyle?: ButtonStyle;
@@ -13,7 +13,7 @@ export function addSectionWithTextBuilder({
 	contents,
 }: Pick<sectionWithButtonType, 'contents'>) {
 	return new SectionBuilder().addTextDisplayComponents(
-		contents.map((x) => addTextDisplayBuilder(x)),
+		addTextDisplayBuilder(contents),
 	);
 }
 
@@ -25,7 +25,7 @@ export function addSectionWithButtonBuilder({
 	buttonDisable = false,
 }: sectionWithButtonType) {
 	return new SectionBuilder()
-		.addTextDisplayComponents(addTextDisplayBuilder(contents.join('\n')))
+		.addTextDisplayComponents(addTextDisplayBuilder(contents))
 		.setButtonAccessory(
 			new ButtonBuilder()
 				.setCustomId(buttonCustomId)

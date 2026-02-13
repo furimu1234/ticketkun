@@ -9,7 +9,7 @@ import {
 	varchar,
 } from 'drizzle-orm/pg-core';
 import type { DiscordMessageTemplate } from './handmeid';
-import type { ProcessType } from './processHandmeid';
+import type { CloseProcessType } from './processHandmeid';
 
 /**
  * 1: first(最初のみ)
@@ -100,56 +100,6 @@ export const ticket = pgTable(
 				},
 			}),
 
-		process: jsonb('process')
-			.notNull()
-			.$type<ProcessType>()
-			.default({
-				1: { name: 'button', Id: 'close', actionIndex: [2] },
-				2: {
-					name: 'message',
-					message: {
-						content: 'クローズしますか？',
-						rows: {
-							version: 1,
-							components: [
-								[
-									{
-										type: 'button',
-										customId: 'custom_exeClose',
-										label: 'CLOSE',
-										emoji: '<:ai_chime:1465619293961195664>',
-										style: ButtonStyle.Danger,
-									},
-								],
-							],
-						},
-					},
-				},
-				3: { name: 'button', Id: 'custom_exeClose', actionIndex: [4, 5, 6] },
-				4: { name: 'ignoreMembers', roles: [], users: [] },
-				5: { name: 'closeThread', ignore: [] },
-				6: {
-					name: 'message',
-					message: {
-						content: 'クローズしました!',
-						rows: {
-							version: 1,
-							components: [
-								[
-									{
-										type: 'button',
-										label: '再OPEN',
-										customId: 'custom_reopen',
-										style: ButtonStyle.Success,
-										emoji: '<:ai_open_letter:1465990917373694126>',
-									},
-								],
-							],
-						},
-					},
-				},
-			}),
-
 		createdAt: timestamp('created_at', { withTimezone: true })
 			.notNull()
 			.defaultNow(),
@@ -160,4 +110,15 @@ export const ticket = pgTable(
 			.$onUpdate(() => new Date()),
 	},
 	(table) => [index('close_panel_panel_id_idx').on(table.panelId)],
+);
+
+export const closeProcessOnButton = pgTable(
+	'close_process_on_button',
+	{
+		panelId: varchar('panel_id', { length: 19 }).primaryKey(),
+		//closeProcess:任意の文字列:panelId
+		triggerCustomId: varchar('trigger_custom_id', { length: 100 }).notNull(),
+		process: jsonb('process').array().notNull().$type<CloseProcessType>(),
+	},
+	(table) => [index('close_process_panel_idx').on(table.panelId)],
 );

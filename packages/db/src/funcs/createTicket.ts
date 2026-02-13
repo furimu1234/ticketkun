@@ -2,7 +2,7 @@ import { messageID, SendError } from '@ticket/lib';
 import type { SchemaDB } from '../client';
 import { ticket } from '../schema';
 
-export type CreateTicketInfoModel = typeof ticket.$inferInsert;
+export type CreateTicketModel = typeof ticket.$inferInsert;
 
 /**
  * チケット発行時に送信される最初のメッセージを登録する
@@ -10,10 +10,7 @@ export type CreateTicketInfoModel = typeof ticket.$inferInsert;
  * @param model model
  * @returns
  */
-export const createTicket = async (
-	db: SchemaDB,
-	model: CreateTicketInfoModel,
-) => {
+export const createTicket = async (db: SchemaDB, model: CreateTicketModel) => {
 	const models = await db
 		.insert(ticket)
 		.values(model)

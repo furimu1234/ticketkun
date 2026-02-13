@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import { getTicketInfo, updateTicketInfo } from '@ticket/db';
+import { getTicket, updateTicket } from '@ticket/db';
 import {
 	confirmDialog,
 	DISCORD_MESSAGE_LIMITS,
@@ -17,11 +17,9 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
-
-import { makeEditClosePanel } from '../../commands/createTicketInfo';
-import { container } from '../../container';
-import { editPanelStore } from '../../utils';
-import { checkPanelName } from './content';
+import { container } from '../../../container';
+import { makeEditCloseFirstMessage } from '../../../settingPanel';
+import { editPanelStore } from '../../../utils';
 
 export const name = Events.InteractionCreate;
 export const once = false;
@@ -50,8 +48,8 @@ const main = async (interaction: ButtonInteraction) => {
 	);
 	if (!panelId) throw new SendError(messageID.E00003());
 
-	const model = await store.do(async (db) => {
-		const model = await getTicketInfo(db, panelId);
+	await store.do(async (db) => {
+		const model = await getTicket(db, panelId);
 
 		if (!model) throw new SendError(messageID.E00001());
 
@@ -62,12 +60,12 @@ const main = async (interaction: ButtonInteraction) => {
 		if (!model.firstMessages.embeds) return;
 
 		const label = new LabelBuilder()
-			.setLabel('新しいタイトルを入力してください!')
+			.setLabel('新しいフッター内容を入力してください!')
 			.setTextInputComponent(
 				new TextInputBuilder()
 					.setCustomId(newItemCustomId)
-					.setValue(model.firstMessages.embeds[0].title ?? '')
-					.setMaxLength(DISCORD_MESSAGE_LIMITS.title)
+					.setValue(model.firstMessages.embeds[0].footer?.text ?? '')
+					.setMaxLength(DISCORD_MESSAGE_LIMITS.footerText)
 					.setStyle(TextInputStyle.Paragraph)
 					.setRequired(false),
 			);
@@ -80,13 +78,12 @@ const main = async (interaction: ButtonInteraction) => {
 					builder: label,
 				},
 			],
-			title: 'タイトル入力画面',
+			title: 'フッター入力画面',
 		});
 
-		model.firstMessages.embeds[0].title =
-			modalR.getTextInputValue(newItemCustomId);
-
-		checkPanelName(model.firstMessages.content, model.firstMessages.embeds);
+		model.firstMessages.embeds[0].footer = {
+			text: modalR.getTextInputValue(newItemCustomId),
+		};
 
 		if (model.firstMessages.rows?.version === 2) {
 			const confirm = confirmDialog(
@@ -106,13 +103,13 @@ const main = async (interaction: ButtonInteraction) => {
 			}
 		}
 
-		await updateTicketInfo(db, model, panelId);
+		await updateTicket(db, model, panelId);
 		return model;
 	});
 
 	if (!interaction.channel?.isSendable()) return;
 
-	await makeEditClosePanel(model, interaction.channel);
+	await makeEditCloseFirstMessage(panelId, interaction.channel);
 
 	await sendMessageThenDelete(
 		{

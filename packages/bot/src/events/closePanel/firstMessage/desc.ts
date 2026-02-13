@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import { getTicketInfo, updateTicketInfo } from '@ticket/db';
+import { getTicket, updateTicket } from '@ticket/db';
 import {
 	confirmDialog,
 	DISCORD_MESSAGE_LIMITS,
@@ -17,10 +17,9 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
-
-import { makeEditClosePanel } from '../../commands/createTicketInfo';
-import { container } from '../../container';
-import { editPanelStore } from '../../utils';
+import { container } from '../../../container';
+import { makeEditCloseFirstMessage } from '../../../settingPanel';
+import { editPanelStore } from '../../../utils';
 
 export const name = Events.InteractionCreate;
 export const once = false;
@@ -49,8 +48,8 @@ const main = async (interaction: ButtonInteraction) => {
 	);
 	if (!panelId) throw new SendError(messageID.E00003());
 
-	const model = await store.do(async (db) => {
-		const model = await getTicketInfo(db, panelId);
+	await store.do(async (db) => {
+		const model = await getTicket(db, panelId);
 
 		if (!model) throw new SendError(messageID.E00001());
 
@@ -103,13 +102,13 @@ const main = async (interaction: ButtonInteraction) => {
 			}
 		}
 
-		await updateTicketInfo(db, model, panelId);
+		await updateTicket(db, model, panelId);
 		return model;
 	});
 
 	if (!interaction.channel?.isSendable()) return;
 
-	await makeEditClosePanel(model, interaction.channel);
+	await makeEditCloseFirstMessage(panelId, interaction.channel);
 
 	await sendMessageThenDelete(
 		{

@@ -45,3 +45,12 @@ export type ProcessType = Record<
 	| CloseThreadType
 	| OpenThreadType
 >;
+
+export type CloseProcessStep =
+	| PushedButton
+	| SendMessageType
+	| IgnoreMembersType
+	| CloseThreadType
+	| OpenThreadType;
+
+export type CloseProcessType = CloseProcessStep[];

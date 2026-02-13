@@ -1,23 +1,29 @@
 import * as path from 'node:path';
-import { getTicketInfo } from '@ticket/db';
+
+import {
+	type DiscordMessageEmbedType,
+	getTicket,
+	updateTicket,
+} from '@ticket/db';
 import {
 	confirmDialog,
+	Dialog,
+	generateRandomString,
 	messageID,
 	SendError,
-	selector,
 	sendMessageThenDelete,
 	wrapSendError,
 } from '@ticket/lib';
 import {
 	type ButtonInteraction,
-	type ColorResolvable,
-	Colors,
 	Events,
+	LabelBuilder,
+	TextInputBuilder,
+	TextInputStyle,
 } from 'discord.js';
-
-import { makeEditClosePanel } from '../../commands/createTicketInfo';
-import { container } from '../../container';
-import { editPanelStore } from '../../utils';
+import { container } from '../../../container';
+import { makeEditCloseFirstMessage } from '../../../settingPanel';
+import { editPanelStore } from '../../../utils';
 
 export const name = Events.InteractionCreate;
 export const once = false;
@@ -40,31 +46,45 @@ const main = async (interaction: ButtonInteraction) => {
 	const interChannel = interaction.channel;
 	if (!interChannel?.isSendable()) return;
 
-	await interaction.deferUpdate();
-
 	const store = container.getDataStore();
 	const panelId = editPanelStore.getEditPanelIdToPanelId(
 		interaction.message.id,
 	);
 	if (!panelId) throw new SendError(messageID.E00003());
 
-	const model = await store.do(async (db) => {
-		const model = await getTicketInfo(db, panelId);
+	await store.do(async (db) => {
+		const model = await getTicket(db, panelId);
 
 		if (!model) throw new SendError(messageID.E00001());
 
-		const embeds = model.firstMessages.embeds;
+		const dialog = Dialog();
 
-		if (!embeds) return;
+		const newContentCustomId = generateRandomString();
 
-		const select = selector(interChannel, '枠線の色を選択してください!');
-		select.setMaxSize(1);
-		const values = await select.string(
-			'枠線の色を選択してください!',
-			Object.keys(Colors).map((color) => ({ name: color, value: color })),
-		);
+		const label = new LabelBuilder()
+			.setLabel('新しい付属文を入力してください!')
+			.setTextInputComponent(
+				new TextInputBuilder()
+					.setCustomId(newContentCustomId)
+					.setValue(model.firstMessages.content ?? '')
+					.setMaxLength(2000)
+					.setStyle(TextInputStyle.Paragraph)
+					.setRequired(false),
+			);
 
-		embeds[0].color = values[0] as ColorResolvable;
+		const modalR = await dialog.modal(interaction, {
+			customId: generateRandomString(),
+			fields: [
+				{
+					type: 'label',
+					builder: label,
+				},
+			],
+			title: '付属文入力画面',
+		});
+
+		model.firstMessages.content = modalR.getTextInputValue(newContentCustomId);
+		checkPanelName(model.firstMessages.content, model.firstMessages.embeds);
 
 		if (model.firstMessages.rows?.version === 2) {
 			const confirm = confirmDialog(
@@ -84,13 +104,13 @@ const main = async (interaction: ButtonInteraction) => {
 			}
 		}
 
-		//await updateTicketInfo(db, model, panelId);
+		await updateTicket(db, model, panelId);
 		return model;
 	});
 
 	if (!interaction.channel?.isSendable()) return;
 
-	await makeEditClosePanel(model, interaction.channel);
+	await makeEditCloseFirstMessage(panelId, interaction.channel);
 
 	await sendMessageThenDelete(
 		{
@@ -99,4 +119,15 @@ const main = async (interaction: ButtonInteraction) => {
 		},
 		interaction,
 	);
+};
+
+export const checkPanelName = (
+	content?: string,
+	embeds: DiscordMessageEmbedType[] = [],
+) => {
+	if (!content && embeds.length !== 0 && !embeds[0].title) {
+		throw new SendError(messageID.E00005());
+	}
+
+	return true;
 };

@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 
 import { container } from '../container';
-import { makeEditClosePanel, makeEditMainPanel } from './createTicketInfo';
+import { makeEditMainPanel, makeEditTicketProcess } from '../settingPanel';
 
 export const data = new SlashCommandBuilder()
 	.setName('お問い合わせ設定変更')
@@ -116,7 +116,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	});
 
 	if (targetPanelType === 'close') {
-		await makeEditClosePanel(model, interaction.channel, true);
+		await makeEditTicketProcess(model.panelId, interaction.channel, true);
 	} else {
 		await makeEditMainPanel(model, interaction.channel, true);
 	}

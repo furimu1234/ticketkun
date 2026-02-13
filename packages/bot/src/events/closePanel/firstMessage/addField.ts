@@ -1,8 +1,8 @@
 import {
 	type DiscordMessageEmbedFieldType,
 	type DiscordMessageEmbedType,
-	getTicketInfo,
-	updateTicketInfo,
+	getTicket,
+	updateTicket,
 } from '@ticket/db';
 import {
 	confirmDialog,
@@ -22,17 +22,16 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
-
-import { makeEditClosePanel } from '../../commands/createTicketInfo';
-import { container } from '../../container';
-import { editPanelStore } from '../../utils';
+import { container } from '../../../container';
+import { makeEditCloseFirstMessage } from '../../../settingPanel';
+import { editPanelStore } from '../../../utils';
 
 export const name = Events.InteractionCreate;
 export const once = false;
 export async function execute(interaction: ButtonInteraction): Promise<void> {
 	if (!interaction.customId) return;
 
-	if (interaction.customId !== `close_add_field`) return;
+	if (interaction.customId !== `add_first_message_field`) return;
 
 	const interChannel = interaction.channel;
 
@@ -54,8 +53,8 @@ const main = async (interaction: ButtonInteraction) => {
 	);
 	if (!panelId) throw new SendError(messageID.E00003());
 
-	const model = await store.do(async (db) => {
-		const model = await getTicketInfo(db, panelId);
+	await store.do(async (db) => {
+		const model = await getTicket(db, panelId);
 		if (!model) throw new SendError(messageID.E00001());
 
 		const newItem = await addField(model, interaction);
@@ -92,14 +91,14 @@ const main = async (interaction: ButtonInteraction) => {
 			}
 		}
 
-		await updateTicketInfo(db, model, panelId);
+		await updateTicket(db, model, panelId);
 
 		return model;
 	});
 
 	if (!interaction.channel?.isSendable()) return;
 
-	await makeEditClosePanel(model, interaction.channel);
+	await makeEditCloseFirstMessage(panelId, interaction.channel);
 	await sendMessageThenDelete(
 		{
 			sleepSecond: 15,
@@ -110,7 +109,7 @@ const main = async (interaction: ButtonInteraction) => {
 };
 
 export const addField = async (
-	model: Awaited<ReturnType<typeof getTicketInfo>>,
+	model: Awaited<ReturnType<typeof getTicket>>,
 	interaction: ButtonInteraction | StringSelectMenuInteraction,
 	oldItem?: DiscordMessageEmbedFieldType,
 ) => {

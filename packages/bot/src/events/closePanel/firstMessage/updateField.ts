@@ -1,24 +1,24 @@
-import { getTicketInfo, updateTicketInfo } from '@ticket/db';
+import { getTicket, updateTicket } from '@ticket/db';
 import {
 	confirmDialog,
 	messageID,
 	SendError,
-	selector,
 	sendMessageThenDelete,
 	wrapSendError,
 } from '@ticket/lib';
 import { type ButtonInteraction, Events } from 'discord.js';
-
-import { makeEditClosePanel } from '../../commands/createTicketInfo';
-import { container } from '../../container';
-import { editPanelStore } from '../../utils';
+import { container } from '../../../container';
+import { makeEditCloseFirstMessage } from '../../../settingPanel';
+import { editPanelStore } from '../../../utils';
+import { addField } from './addField';
+import { selectField } from './removeField';
 
 export const name = Events.InteractionCreate;
 export const once = false;
 export async function execute(interaction: ButtonInteraction): Promise<void> {
 	if (!interaction.customId) return;
 
-	if (interaction.customId !== `close_delete_field`) return;
+	if (interaction.customId !== `close_edit_field`) return;
 
 	const interChannel = interaction.channel;
 
@@ -42,27 +42,37 @@ const main = async (interaction: ButtonInteraction) => {
 	);
 	if (!panelId) throw new SendError(messageID.E00003());
 
-	const model = await store.do(async (db) => {
-		const model = await getTicketInfo(db, panelId);
+	await store.do(async (db) => {
+		const model = await getTicket(db, panelId);
 
 		if (!model) throw new SendError(messageID.E00001());
 
+		if (!model.firstMessages.embeds) return;
 		const embeds = model.firstMessages.embeds;
-		if (!embeds) throw new SendError(messageID.E00001());
-		const fields = embeds[0].fields;
-		if (!fields) throw new SendError(messageID.E00001());
+		if (!embeds || embeds[0].fields === undefined)
+			throw new SendError(messageID.E00001());
 
-		const selection = await selectField(model, interaction, true);
+		const selection = await selectField(model, interaction, false);
 		if (!selection) throw new SendError(messageID.E00001());
-
-		await selection.deferUpdate();
-		await selection.deleteReply();
 
 		const selectedValues = selection.values;
 
-		embeds[0].fields = fields?.filter(
-			(field) => field.name !== selectedValues[0],
+		const oldField = embeds[0].fields?.find(
+			(field) => field.name === selectedValues[0],
 		);
+
+		const newField = await addField(model, selection, oldField);
+		await selection.deleteReply();
+
+		if (!newField) {
+			throw new SendError(messageID.E00001());
+		}
+
+		embeds[0].fields = embeds[0].fields.map((field) => {
+			if (field.name !== oldField?.name) return field;
+
+			return newField;
+		});
 
 		if (model.firstMessages.rows?.version === 2) {
 			const confirm = confirmDialog(
@@ -82,13 +92,13 @@ const main = async (interaction: ButtonInteraction) => {
 			}
 		}
 
-		await updateTicketInfo(db, model, panelId);
+		await updateTicket(db, model, panelId);
 		return model;
 	});
 
 	if (!interaction.channel?.isSendable()) return;
 
-	await makeEditClosePanel(model, interaction.channel);
+	await makeEditCloseFirstMessage(panelId, interaction.channel);
 
 	await sendMessageThenDelete(
 		{
@@ -97,38 +107,4 @@ const main = async (interaction: ButtonInteraction) => {
 		},
 		interaction,
 	);
-};
-
-export const selectField = async (
-	model: Awaited<ReturnType<typeof getTicketInfo>>,
-	interaction: ButtonInteraction,
-	isDelete: boolean,
-) => {
-	const embeds = model?.firstMessages.embeds;
-	if (!embeds) return;
-
-	const embed = embeds[0];
-
-	const interChannel = interaction.channel;
-	if (!interChannel?.isSendable()) return;
-
-	if (embed.fields) {
-		const select = selector(
-			interChannel,
-			`どのフィールドを${isDelete ? '削除' : '更新'}しますか？`,
-		);
-		const selection = await select.stringToInteraction(
-			`${isDelete ? '削除' : '更新'}するフィールド名を選択してください!`,
-			embed.fields?.map((x) => {
-				return {
-					name: x.name,
-					value: x.name,
-				};
-			}),
-		);
-
-		if (!selection) throw new SendError(messageID.E00001());
-		return selection;
-	}
-	return;
 };
