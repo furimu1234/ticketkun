@@ -117,7 +117,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 			triggerCustomId: `closeProcess:チケットクローズ:${panel.id}`,
 			process: [
 				{ name: 'ignoreMembers', roles: [], users: [] },
-				{ name: 'closeThread' },
+				{ name: 'closeThread', target: 'same' },
 				{
 					name: 'message',
 					message: {
