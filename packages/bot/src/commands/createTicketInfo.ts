@@ -147,7 +147,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 			triggerCustomId: `closeProcess:再オープン:${panel.id}`,
 			process: [
 				{ name: 'includeMembers', roles: [], users: [] },
-				{ name: 'openThread', target: 'same' },
+				{ name: 'openThread', target: 'same', includeCreator: true },
 				{
 					name: 'message',
 					message: {

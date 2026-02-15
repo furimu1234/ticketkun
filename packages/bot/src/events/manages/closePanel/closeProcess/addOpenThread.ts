@@ -47,6 +47,7 @@ const main = async (
 	model.process.push({
 		name: 'openThread',
 		target: 'same',
+		includeCreator: true,
 	});
 
 	await store.do(async (db) => {

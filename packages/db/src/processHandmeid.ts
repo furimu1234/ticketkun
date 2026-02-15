@@ -24,6 +24,7 @@ export const lastMessageDeleteSchema = z.object({
 export const openThreadSchema = z.object({
 	name: z.literal('openThread'),
 	target: z.union([z.literal('same'), z.string()]).optional(),
+	includeCreator: z.boolean(),
 });
 
 // スレッドをクローズする

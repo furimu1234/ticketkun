@@ -131,6 +131,17 @@ const main = async (
 					thread = targetThread;
 				}
 
+				//チケットを再オープンするときにチケット作成者を含めるか
+				if (step.includeCreator) {
+					const userTicketModel = await store.do(
+						async (db) => await getUserTicket(db, thread?.id ?? ''),
+					);
+
+					if (userTicketModel) {
+						await thread.members.add(userTicketModel.creatorId);
+					}
+				}
+
 				await thread.setArchived(false);
 				await sendThreadMember(thread, includeRoles, includeMembers);
 				break;
