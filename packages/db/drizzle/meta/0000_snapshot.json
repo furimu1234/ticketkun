@@ -1,5 +1,5 @@
 {
-  "id": "dfe07c53-3278-41e5-a9ed-a84b3b5651f5",
+  "id": "6e4bcff9-b2f5-4936-9839-38102a949d8b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -80,7 +80,7 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true,
-          "default": "'{\"content\":\"[クローズ]ボタンを押してこのスレッドをクローズできます!\",\"embeds\":[{\"description\":\"トラブルやBOTの不具合を報告してください!\"}],\"rows\":{\"version\":1,\"components\":[[{\"customId\":\"closeProcess:close:\",\"label\":\"クローズ\",\"emoji\":\"<:ai_chime:1465642091978690766>\",\"type\":\"button\",\"style\":4}]]}}'::jsonb"
+          "default": "'{\"content\":\"[クローズ]ボタンを押してこのスレッドをクローズできます!\",\"embeds\":[{\"description\":\"トラブルやBOTの不具合を報告してください!\"}],\"rows\":{\"version\":1,\"components\":[[{\"customId\":\"closeProcess:close:\",\"label\":\"クローズ\",\"emoji\":\"<:ai_chime:1465642091978690766>\",\"type\":\"button\",\"style\":4,\"buttonName\":\"クローズ\"}]]}}'::jsonb"
         },
         "created_at": {
           "name": "created_at",
@@ -155,7 +155,7 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true,
-          "default": "'{\"content\":\"[クローズ]ボタンを押してこのスレッドをクローズできます!\",\"embeds\":[{\"description\":\"トラブルやBOTの不具合を報告してください!\"}],\"rows\":{\"version\":1,\"components\":[[{\"customId\":\"ticket_start\",\"label\":\"お問い合わせ作成\",\"emoji\":\"<:ai_open_letter:1465990917373694126>\",\"type\":\"button\",\"style\":3}]]}}'::jsonb"
+          "default": "'{\"content\":\"\",\"embeds\":[{\"description\":\"トラブルやBOTの不具合を報告してください!\"}],\"rows\":{\"version\":1,\"components\":[[{\"customId\":\"ticket_start\",\"label\":\"お問い合わせ作成\",\"emoji\":\"<:ai_open_letter:1465990917373694126>\",\"type\":\"button\",\"style\":3,\"buttonName\":\"お問い合わせ作成\"}]]}}'::jsonb"
         },
         "created_at": {
           "name": "created_at",

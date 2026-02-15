@@ -1,1 +1,0 @@
-ALTER TABLE "ticket_info" ALTER COLUMN "main_panel" SET DEFAULT '{"content":"","embeds":[{"description":"トラブルやBOTの不具合を報告してください!"}],"rows":{"version":1,"components":[[{"customId":"ticket_start","label":"お問い合わせ作成","emoji":"<:ai_open_letter:1465990917373694126>","type":"button","style":3}]]}}'::jsonb;
