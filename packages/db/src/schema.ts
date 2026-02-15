@@ -33,7 +33,7 @@ export const ticketInfo = pgTable(
 			.$type<DiscordMessageTemplate>()
 			.notNull()
 			.default({
-				content: '[クローズ]ボタンを押してこのスレッドをクローズできます!',
+				content: '',
 				embeds: [
 					{
 						description: 'トラブルやBOTの不具合を報告してください!',
@@ -49,6 +49,7 @@ export const ticketInfo = pgTable(
 								emoji: '<:ai_open_letter:1465990917373694126>',
 								type: 'button',
 								style: ButtonStyle.Success,
+								buttonName: 'お問い合わせ作成',
 							},
 						],
 					],
@@ -89,11 +90,12 @@ export const ticket = pgTable(
 					components: [
 						[
 							{
-								customId: 'close',
+								customId: 'closeProcess:close:',
 								label: 'クローズ',
-								emoji: '<:ai_chime:1465619293961195664>',
+								emoji: '<:ai_chime:1465642091978690766>',
 								type: 'button',
 								style: ButtonStyle.Danger,
+								buttonName: 'クローズ',
 							},
 						],
 					],
@@ -115,10 +117,37 @@ export const ticket = pgTable(
 export const closeProcessOnButton = pgTable(
 	'close_process_on_button',
 	{
-		panelId: varchar('panel_id', { length: 19 }).primaryKey(),
+		//processName: text().notNull(),
+		panelId: varchar('panel_id', { length: 19 }),
 		//closeProcess:任意の文字列:panelId
-		triggerCustomId: varchar('trigger_custom_id', { length: 100 }).notNull(),
+		triggerCustomId: varchar('trigger_custom_id', { length: 100 })
+			.notNull()
+			.primaryKey(),
 		process: jsonb('process').array().notNull().$type<CloseProcessType>(),
+		createdAt: timestamp('created_at', { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+
+		updatedAt: timestamp('updated_at', { withTimezone: true })
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => new Date()),
 	},
 	(table) => [index('close_process_panel_idx').on(table.panelId)],
+);
+
+export const userTicket = pgTable(
+	'user_ticket',
+	{
+		ticketId: varchar('ticket_id', { length: 19 }).primaryKey(),
+		creatorId: varchar('creator_id', { length: 19 }).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true })
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => new Date()),
+	},
+	(table) => [index('user_ticket_ticket_idx').on(table.ticketId)],
 );

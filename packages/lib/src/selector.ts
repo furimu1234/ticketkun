@@ -12,6 +12,8 @@ import {
 	StringSelectMenuBuilder,
 	type StringSelectMenuInteraction,
 	StringSelectMenuOptionBuilder,
+	UserSelectMenuBuilder,
+	type UserSelectMenuInteraction,
 } from 'discord.js';
 import { chunk, sleep } from './';
 import { generateRandomString } from './random';
@@ -22,6 +24,7 @@ export const selector = (
 ) => {
 	let cancelMessage = 'キャンセルしました。処理を中断します。';
 	let maxSize = 1;
+	let minSize = 1;
 
 	const setCancelMessage = (message: string) => {
 		cancelMessage = message;
@@ -29,6 +32,9 @@ export const selector = (
 
 	const setMaxSize = (_maxSize: number) => {
 		maxSize = _maxSize;
+	};
+	const setMinSize = (_minSize: number) => {
+		minSize = _minSize;
 	};
 
 	const channel = async (guild: Guild, ...channelTypes: ChannelType[]) => {
@@ -82,14 +88,15 @@ export const selector = (
 		return channels;
 	};
 
-	const role = async (guild: Guild) => {
+	const role = async (guild: Guild, defaultRoles: string[] = []) => {
 		const customId = `channel_select:${generateRandomString()}`;
 
 		const menu = new RoleSelectMenuBuilder()
 			.setCustomId(customId)
 			.setPlaceholder('ロールを選んでください')
 			.setMaxValues(maxSize)
-			.setMinValues(1);
+			.setMinValues(minSize)
+			.setDefaultRoles(defaultRoles);
 
 		const row = new ActionRowBuilder<RoleSelectMenuBuilder>().addComponents(
 			menu,
@@ -131,6 +138,57 @@ export const selector = (
 			.map(() => guild.roles.cache.get(selectedRoleId))
 			.filter((x) => x !== undefined);
 		return roles;
+	};
+	const user = async (guild: Guild, defaultUsers: string[] = []) => {
+		const customId = `channel_select:${generateRandomString()}`;
+
+		const menu = new UserSelectMenuBuilder()
+			.setCustomId(customId)
+			.setPlaceholder('ユーザを選んでください')
+			.setMaxValues(maxSize)
+			.setMinValues(minSize)
+			.setDefaultUsers(defaultUsers);
+
+		const row = new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(
+			menu,
+		);
+
+		// セレクトメニューを送信
+		const _reply = await sendableChannel.send({
+			content: question,
+			components: [row],
+		});
+		const reply = await _reply.fetch();
+
+		let selection: UserSelectMenuInteraction<CacheType> | undefined;
+
+		try {
+			selection = await reply.awaitMessageComponent({
+				componentType: ComponentType.UserSelect,
+				time: 3 * 60 * 1000,
+			});
+			if (selection.customId !== customId) return [];
+
+			await selection.deferUpdate();
+			await selection.deleteReply();
+		} catch {
+			return [];
+		}
+
+		if (!selection) {
+			const message = await sendableChannel.send({
+				content: cancelMessage,
+			});
+			await sleep(15);
+			await message.delete();
+			return [];
+		}
+
+		const selectedUserId = selection.values[0];
+		const users = selection.values
+			.map(() => guild.members.cache.get(selectedUserId))
+			.filter((x) => x !== undefined);
+		return users;
 	};
 	const string = async (
 		placeholder: string,
@@ -245,8 +303,10 @@ export const selector = (
 	return {
 		setCancelMessage,
 		setMaxSize,
+		setMinSize,
 		channel,
 		role,
+		user,
 		string,
 		stringToInteraction,
 	};

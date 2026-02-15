@@ -1,4 +1,8 @@
-import { getTicket, getTicketInfo } from '@ticket/db';
+import {
+	type DiscordMessageButtonRow,
+	getTicket,
+	getTicketInfo,
+} from '@ticket/db';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -9,11 +13,13 @@ import {
 	TextDisplayBuilder,
 } from 'discord.js';
 import {
+	addSectionWithButtonBuilder,
 	addSeparatorBuilder,
 	addTextDisplayBuilder,
 } from '../components/shared';
 import { container } from '../container';
 import { editPanelStore } from '../utils';
+import { styleToJp } from './mainPanel';
 import { createPreviewModel } from './shared';
 
 export const makeEditCloseFirstMessage = async (
@@ -21,6 +27,7 @@ export const makeEditCloseFirstMessage = async (
 	editChannel: SendableChannels,
 	forceUpdate: boolean = false,
 	previewNewContent?: string,
+	isShowEmoji: boolean = true,
 ) => {
 	const store = container.getDataStore();
 
@@ -126,9 +133,39 @@ export const makeEditCloseFirstMessage = async (
 	containerBuilder.addActionRowComponents(row1, row2, row3);
 
 	containerBuilder.addSeparatorComponents(addSeparatorBuilder());
-	containerBuilder.addTextDisplayComponents(
-		addTextDisplayBuilder('# ボタン追加・変更・削除メニュー'),
+	containerBuilder.addSectionComponents(
+		addSectionWithButtonBuilder({
+			contents: '# ボタン追加・変更・削除メニュー',
+			buttonCustomId: `addFirstMessagesButton`,
+			buttonLabel: 'ボタン追加',
+			buttonStyle: ButtonStyle.Primary,
+		}),
 	);
+
+	containerBuilder.addSeparatorComponents(addSeparatorBuilder());
+
+	if (model.firstMessages.rows?.version === 1) {
+		for (const components of model.firstMessages.rows.components) {
+			const row = new ActionRowBuilder<ButtonBuilder>();
+
+			for (const component of components) {
+				if (component.type === 'button') {
+					const button = new ButtonBuilder({
+						label: `${component.label}を編集`,
+						customId: `editFirstMessagesComponent-${component.customId}-${model.panelId}`,
+						style: component.style,
+					});
+
+					if (isShowEmoji && component.emoji) {
+						button.setEmoji(component.emoji);
+					}
+
+					row.addComponents(button);
+				}
+			}
+			containerBuilder.addActionRowComponents(row);
+		}
+	}
 
 	const settingPanel = editPanelStore.getbyEditPanelId(model.panelId);
 
@@ -145,4 +182,64 @@ export const makeEditCloseFirstMessage = async (
 			flags: MessageFlags.IsComponentsV2,
 		});
 	}
+};
+
+export const makeEditFirstMessagesButton = async (
+	targetCustomId: string,
+	targetComponent: DiscordMessageButtonRow,
+	panelId: string,
+) => {
+	const containerBuilder = new ContainerBuilder();
+
+	containerBuilder.addActionRowComponents(
+		new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder({
+				customId: `editToFirstMessages-${targetCustomId}-${panelId}`,
+				label: 'メインパネルに変更',
+				style: ButtonStyle.Primary,
+			}),
+
+			new ButtonBuilder({
+				customId: `deleteFirstMessagesButton-${targetCustomId}-${panelId}`,
+				label: 'ボタン削除',
+				style: ButtonStyle.Danger,
+			}),
+		),
+	);
+
+	//TODO:
+	// ボタン削除時の処理(メインパネルも)
+
+	containerBuilder.addSeparatorComponents(addSeparatorBuilder());
+	containerBuilder.addSectionComponents(
+		addSectionWithButtonBuilder({
+			contents: `## ラベル変更\n- ${targetComponent.label}`,
+			buttonLabel: 'ラベル変更',
+			buttonCustomId: `editFirstMessagesLabel-${targetCustomId}-${panelId}`,
+		}),
+	);
+	containerBuilder.addSeparatorComponents(addSeparatorBuilder());
+	containerBuilder.addSectionComponents(
+		addSectionWithButtonBuilder({
+			contents: `## 色変更\n- ${styleToJp(targetComponent.style)}`,
+			buttonLabel: '	色変更',
+			buttonCustomId: `editFirstMessagesColor-${targetCustomId}-${panelId}`,
+		}),
+	);
+	containerBuilder.addSeparatorComponents(addSeparatorBuilder());
+
+	containerBuilder.addSectionComponents(
+		addSectionWithButtonBuilder({
+			contents: `## 絵文字変更\n- ${targetComponent.emoji ?? '絵文字なし'}`,
+			buttonLabel: '絵文字変更',
+			buttonCustomId: `editFirstMessagesEmoji-${targetCustomId}-${panelId}`,
+		}),
+	);
+
+	const panel = editPanelStore.getbyEditPanelId(panelId);
+
+	await panel?.edit({
+		components: [containerBuilder],
+		flags: MessageFlags.IsComponentsV2,
+	});
 };

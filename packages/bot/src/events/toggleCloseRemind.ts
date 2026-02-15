@@ -1,9 +1,9 @@
 import { getTicketInfo, updateTicketInfo } from '@ticket/db';
 import { messageID, SendError } from '@ticket/lib';
 import { type ButtonInteraction, Events } from 'discord.js';
-import { makeEditClosePanel } from '../commands/createTicketInfo';
 
 import { container } from '../container';
+import { makeEditMainPanel } from '../settingPanel';
 
 export const name = Events.InteractionCreate;
 export const once = false;
@@ -30,5 +30,5 @@ export async function execute(interaction: ButtonInteraction): Promise<void> {
 
 	if (!interaction.channel?.isSendable()) return;
 
-	await makeEditClosePanel(model, interaction.channel);
+	await makeEditMainPanel(model, interaction.channel);
 }

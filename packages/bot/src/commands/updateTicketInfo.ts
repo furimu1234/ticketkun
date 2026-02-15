@@ -26,7 +26,7 @@ data.addStringOption(
 	new SlashCommandStringOption()
 		.addChoices([
 			{ name: 'メインパネルを編集する', value: 'main' },
-			{ name: 'チケット内パネルを編集する', value: 'close' },
+			{ name: 'チケット内処理を編集する', value: 'close' },
 		])
 		.setName('編集するパネルの種類')
 		.setDescription('編集するパネルの種類を選択してください。')

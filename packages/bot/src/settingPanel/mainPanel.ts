@@ -1,4 +1,4 @@
-import { getTicketInfo } from '@ticket/db';
+import { type DiscordMessageButtonRow, getTicketInfo } from '@ticket/db';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -9,6 +9,7 @@ import {
 	TextDisplayBuilder,
 } from 'discord.js';
 import {
+	addSectionWithButtonBuilder,
 	addSeparatorBuilder,
 	addTextDisplayBuilder,
 } from '../components/shared';
@@ -20,6 +21,7 @@ export const makeEditMainPanel = async (
 	editChannel: SendableChannels,
 	forceUpdate: boolean = false,
 	previewNewContent?: string,
+	isShowEmoji: boolean = true,
 ) => {
 	if (!oldmodel) return;
 
@@ -140,22 +142,130 @@ export const makeEditMainPanel = async (
 
 	containerBuilder.addSeparatorComponents(addSeparatorBuilder());
 	containerBuilder.addTextDisplayComponents(
-		addTextDisplayBuilder('# ボタン追加・変更・削除メニュー'),
+		addTextDisplayBuilder('# ボタン変更メニュー'),
 	);
+
+	containerBuilder.addSeparatorComponents(addSeparatorBuilder());
+
+	if (model.mainPanel.rows?.version === 1) {
+		for (const components of model.mainPanel.rows.components) {
+			const row = new ActionRowBuilder<ButtonBuilder>();
+
+			for (const component of components) {
+				if (component.type === 'button') {
+					const button = new ButtonBuilder({
+						label: `${component.label}を編集`,
+						customId: `editMainPanelComponent-${component.customId}-${model.panelId}`,
+						style: component.style,
+					});
+
+					if (isShowEmoji && component.emoji) {
+						button.setEmoji(component.emoji);
+					}
+
+					row.addComponents(button);
+				}
+			}
+			containerBuilder.addActionRowComponents(row);
+		}
+	}
 
 	const settingPanel = editPanelStore.getbyEditPanelId(model.panelId);
 
-	if (!settingPanel || forceUpdate) {
-		const settingPanel = await editChannel.send({
-			components: [containerBuilder],
-			flags: MessageFlags.IsComponentsV2,
-		});
-		editPanelStore.setEditPanelIdToPanelId(settingPanel.id, model.panelId);
-		editPanelStore.setbyEditPanelId(model.panelId, settingPanel);
-	} else {
-		await settingPanel.edit({
-			components: [containerBuilder],
-			flags: MessageFlags.IsComponentsV2,
-		});
+	try {
+		if (!settingPanel || forceUpdate) {
+			const settingPanel = await editChannel.send({
+				components: [containerBuilder],
+				flags: MessageFlags.IsComponentsV2,
+			});
+			editPanelStore.setEditPanelIdToPanelId(settingPanel.id, model.panelId);
+			editPanelStore.setbyEditPanelId(model.panelId, settingPanel);
+		} else {
+			await settingPanel.edit({
+				components: [containerBuilder],
+				flags: MessageFlags.IsComponentsV2,
+			});
+		}
+	} catch (e) {
+		const s = e instanceof Error ? (e.stack ?? e.message) : JSON.stringify(e);
+		if (s.includes('COMPONENT_INVALID_EMOJI') || s.includes('Invalid emoji')) {
+			await previewMessage.delete().catch(() => null);
+			await editPanel.delete().catch(() => null);
+
+			await makeEditMainPanel(
+				oldmodel,
+				editChannel,
+				forceUpdate,
+				previewNewContent,
+				false,
+			);
+			return;
+		}
 	}
+};
+
+export const makeEditMainPanelButton = async (
+	targetCustomId: string,
+	targetComponent: DiscordMessageButtonRow,
+	panelId: string,
+) => {
+	const containerBuilder = new ContainerBuilder();
+
+	containerBuilder.addActionRowComponents(
+		new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder({
+				customId: `editToMainPanel-${targetCustomId}-${panelId}`,
+				label: 'メインパネルに変更',
+				style: ButtonStyle.Primary,
+			}),
+		),
+	);
+
+	containerBuilder.addSeparatorComponents(addSeparatorBuilder());
+	containerBuilder.addSectionComponents(
+		addSectionWithButtonBuilder({
+			contents: `## ラベル変更\n- ${targetComponent.label}`,
+			buttonLabel: 'ラベル変更',
+			buttonCustomId: `editMainPanelLabel-${targetCustomId}-${panelId}`,
+		}),
+	);
+	containerBuilder.addSeparatorComponents(addSeparatorBuilder());
+	containerBuilder.addSectionComponents(
+		addSectionWithButtonBuilder({
+			contents: `## 色変更\n- ${styleToJp(targetComponent.style)}`,
+			buttonLabel: '	色変更',
+			buttonCustomId: `editMainPanelColor-${targetCustomId}-${panelId}`,
+		}),
+	);
+	containerBuilder.addSeparatorComponents(addSeparatorBuilder());
+
+	containerBuilder.addSectionComponents(
+		addSectionWithButtonBuilder({
+			contents: `## 絵文字変更\n- ${targetComponent.emoji}`,
+			buttonLabel: '絵文字変更',
+			buttonCustomId: `editMainPanelEmoji-${targetCustomId}-${panelId}`,
+		}),
+	);
+
+	const panel = editPanelStore.getbyEditPanelId(panelId);
+
+	await panel?.edit({
+		components: [containerBuilder],
+		flags: MessageFlags.IsComponentsV2,
+	});
+};
+
+export const styleToJp = (style: ButtonStyle) => {
+	switch (style) {
+		case ButtonStyle.Primary:
+			return '青色';
+		case ButtonStyle.Danger:
+			return '赤色';
+		case ButtonStyle.Secondary:
+			return '灰色';
+		case ButtonStyle.Success:
+			return '緑色';
+	}
+
+	return '不明な色';
 };

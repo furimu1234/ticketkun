@@ -71,11 +71,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 					components: [
 						[
 							{
-								customId: `close:${panel.id}`,
+								customId: `closeProcess:クローズ確認:${panel.id}`,
 								label: 'クローズ',
-								emoji: '<:ai_chime:1465619293961195664>',
+								emoji: '<:ai_chime:1465642091978690766>',
 								type: 'button',
 								style: ButtonStyle.Danger,
+								buttonName: 'クローズ確認',
 							},
 						],
 					],
@@ -85,7 +86,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
 		await createCloseProcess(db, {
 			panelId: panel.id,
-			triggerCustomId: `closeProcess:close:${panel.id}`,
+			triggerCustomId: `closeProcess:クローズ確認:${panel.id}`,
 			process: [
 				{
 					name: 'message',
@@ -97,10 +98,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 								[
 									{
 										type: 'button',
-										customId: `closeProcess:custom_exeClose:${panel.id}`,
-										label: 'CLOSE',
-										emoji: '<:ai_chime:1465619293961195664>',
+										customId: `closeProcess:チケットクローズ:${panel.id}`,
+										label: '本当にクローズ',
+										emoji: '<:ai_chime:1465642091978690766>',
 										style: ButtonStyle.Danger,
+										buttonName: 'チケットクローズ',
 									},
 								],
 							],
@@ -112,10 +114,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
 		await createCloseProcess(db, {
 			panelId: panel.id,
-			triggerCustomId: `closeProcess:custom_exeClose:${panel.id}`,
+			triggerCustomId: `closeProcess:チケットクローズ:${panel.id}`,
 			process: [
 				{ name: 'ignoreMembers', roles: [], users: [] },
-				{ name: 'closeThread', ignore: [] },
+				{ name: 'closeThread' },
 				{
 					name: 'message',
 					message: {
@@ -126,14 +128,30 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 								[
 									{
 										type: 'button',
-										label: '再OPEN',
-										customId: 'custom_reopen',
+										label: '再オープン',
+										customId: `closeProcess:再オープン:${panel.id}`,
 										style: ButtonStyle.Success,
-										emoji: '<:ai_open_letter:1465990917373694126>',
+										emoji: '<:letterReOpen:1472078075738067149>',
+										buttonName: '再オープン',
 									},
 								],
 							],
 						},
+					},
+				},
+			],
+		});
+
+		await createCloseProcess(db, {
+			panelId: panel.id,
+			triggerCustomId: `closeProcess:再オープン:${panel.id}`,
+			process: [
+				{ name: 'includeMembers', roles: [], users: [] },
+				{ name: 'openThread', target: 'same' },
+				{
+					name: 'message',
+					message: {
+						content: '再オープンしました!',
 					},
 				},
 			],

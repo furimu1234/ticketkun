@@ -7,7 +7,7 @@ import {
 	wrapSendError,
 } from '@ticket/lib';
 import { type ButtonInteraction, ChannelType, Events } from 'discord.js';
-import { makeEditClosePanel } from '../commands/createTicketInfo';
+import { makeEditMainPanel } from '../settingPanel';
 
 import { container } from '../container';
 import { editPanelStore } from '../utils';
@@ -77,7 +77,7 @@ const main = async (interaction: ButtonInteraction) => {
 		return model;
 	});
 
-	await makeEditClosePanel(
+	await makeEditMainPanel(
 		model,
 		interactionChannel,
 		false,

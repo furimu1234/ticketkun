@@ -1,10 +1,9 @@
 .
-├── Dockerfile
 ├── biome.json
 ├── docker-compose.yml
+├── Dockerfile
+├── flake.nix
 ├── node_modules
-│   ├── @biomejs
-│   │   └── biome -> ../.pnpm/@biomejs+biome@2.3.8/node_modules/@biomejs/biome
 │   ├── discord.js -> .pnpm/discord.js@14.25.1/node_modules/discord.js
 │   ├── dotenv -> .pnpm/dotenv@17.2.3/node_modules/dotenv
 │   ├── drizzle-orm -> .pnpm/drizzle-orm@0.43.1_@types+pg@8.15.6_pg@8.16.3/node_modules/drizzle-orm
@@ -16,39 +15,128 @@
 │   │   │   ├── commands
 │   │   │   │   ├── createTicketInfo.js
 │   │   │   │   ├── main.js
-│   │   │   │   └── welcomeMessage.js
+│   │   │   │   └── updateTicketInfo.js
+│   │   │   ├── components
+│   │   │   │   └── shared
+│   │   │   │       ├── addSectionWith.js
+│   │   │   │       ├── addSeparator.js
+│   │   │   │       ├── addTextDisplay.js
+│   │   │   │       └── index.js
 │   │   │   ├── container.js
 │   │   │   ├── events
-│   │   │   │   └── commands.js
+│   │   │   │   ├── commands.js
+│   │   │   │   ├── deleteSetting.js
+│   │   │   │   ├── manages
+│   │   │   │   │   ├── closePanel
+│   │   │   │   │   │   └── firstMessage
+│   │   │   │   │   │       ├── addField.js
+│   │   │   │   │   │       ├── color.js
+│   │   │   │   │   │       ├── content.js
+│   │   │   │   │   │       ├── desc.js
+│   │   │   │   │   │       ├── footer.js
+│   │   │   │   │   │       ├── header.js
+│   │   │   │   │   │       ├── removeField.js
+│   │   │   │   │   │       ├── start.js
+│   │   │   │   │   │       ├── title.js
+│   │   │   │   │   │       └── updateField.js
+│   │   │   │   │   └── editMainPanel
+│   │   │   │   │       ├── addField.js
+│   │   │   │   │       ├── color.js
+│   │   │   │   │       ├── content.js
+│   │   │   │   │       ├── desc.js
+│   │   │   │   │       ├── footer.js
+│   │   │   │   │       ├── header.js
+│   │   │   │   │       ├── removeField.js
+│   │   │   │   │       ├── title.js
+│   │   │   │   │       └── updateField.js
+│   │   │   │   ├── toggleCloseRemind.js
+│   │   │   │   ├── updateMainPanel.js
+│   │   │   │   └── users
+│   │   │   │       └── ticket
+│   │   │   │           ├── closeProcess.js
+│   │   │   │           └── start.js
 │   │   │   ├── index.js
 │   │   │   ├── loadEvents.js
+│   │   │   ├── settingPanel
+│   │   │   │   ├── firstMessage.js
+│   │   │   │   ├── index.js
+│   │   │   │   ├── mainPanel.js
+│   │   │   │   ├── shared.js
+│   │   │   │   └── ticketProcess.js
 │   │   │   ├── types.js
 │   │   │   └── utils
+│   │   │       ├── editPanel.js
 │   │   │       ├── env.js
+│   │   │       ├── index.js
 │   │   │       └── registerCommands.js
 │   │   ├── node_modules
+│   │   │   ├── pg -> ../../../node_modules/.pnpm/pg@8.16.3/node_modules/pg
+│   │   │   ├── pino -> ../../../node_modules/.pnpm/pino@9.14.0/node_modules/pino
+│   │   │   ├── pino-pretty -> ../../../node_modules/.pnpm/pino-pretty@13.1.3/node_modules/pino-pretty
 │   │   │   ├── @ticket
 │   │   │   │   ├── db -> ../../../db
 │   │   │   │   └── lib -> ../../../lib
 │   │   │   ├── @types
 │   │   │   │   └── pg -> ../../../../node_modules/.pnpm/@types+pg@8.15.6/node_modules/@types/pg
-│   │   │   ├── pg -> ../../../node_modules/.pnpm/pg@8.16.3/node_modules/pg
-│   │   │   ├── pino -> ../../../node_modules/.pnpm/pino@9.14.0/node_modules/pino
-│   │   │   ├── pino-pretty -> ../../../node_modules/.pnpm/pino-pretty@13.1.3/node_modules/pino-pretty
 │   │   │   └── typescript -> ../../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript
 │   │   ├── package.json
 │   │   ├── src
 │   │   │   ├── commands
 │   │   │   │   ├── createTicketInfo.ts
-│   │   │   │   └── main.ts
+│   │   │   │   ├── main.ts
+│   │   │   │   └── updateTicketInfo.ts
+│   │   │   ├── components
+│   │   │   │   └── shared
+│   │   │   │       ├── addSectionWith.ts
+│   │   │   │       ├── addSeparator.ts
+│   │   │   │       ├── addTextDisplay.ts
+│   │   │   │       └── index.ts
 │   │   │   ├── container.ts
 │   │   │   ├── events
-│   │   │   │   └── commands.ts
+│   │   │   │   ├── commands.ts
+│   │   │   │   ├── deleteSetting.ts
+│   │   │   │   ├── manages
+│   │   │   │   │   ├── closePanel
+│   │   │   │   │   │   └── firstMessage
+│   │   │   │   │   │       ├── addField.ts
+│   │   │   │   │   │       ├── color.ts
+│   │   │   │   │   │       ├── content.ts
+│   │   │   │   │   │       ├── desc.ts
+│   │   │   │   │   │       ├── footer.ts
+│   │   │   │   │   │       ├── header.ts
+│   │   │   │   │   │       ├── removeField.ts
+│   │   │   │   │   │       ├── start.ts
+│   │   │   │   │   │       ├── title.ts
+│   │   │   │   │   │       └── updateField.ts
+│   │   │   │   │   └── editMainPanel
+│   │   │   │   │       ├── addField.ts
+│   │   │   │   │       ├── color.ts
+│   │   │   │   │       ├── content.ts
+│   │   │   │   │       ├── desc.ts
+│   │   │   │   │       ├── footer.ts
+│   │   │   │   │       ├── header.ts
+│   │   │   │   │       ├── removeField.ts
+│   │   │   │   │       ├── title.ts
+│   │   │   │   │       └── updateField.ts
+│   │   │   │   ├── toggleCloseRemind.ts
+│   │   │   │   ├── updateMainPanel.ts
+│   │   │   │   └── users
+│   │   │   │       └── ticket
+│   │   │   │           ├── closeProcess.ts
+│   │   │   │           └── start.ts
 │   │   │   ├── index.ts
 │   │   │   ├── loadEvents.ts
+│   │   │   ├── settingPanel
+│   │   │   │   ├── firstMessage.ts
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── mainPanel.ts
+│   │   │   │   ├── shared.ts
+│   │   │   │   └── ticketProcess.ts
 │   │   │   ├── types.ts
 │   │   │   └── utils
+│   │   │       ├── editPanel.ts
 │   │   │       ├── env.ts
+│   │   │       ├── index.ts
 │   │   │       └── registerCommands.ts
 │   │   └── tsconfig.json
 │   ├── db
@@ -57,21 +145,39 @@
 │   │   │   ├── client.js
 │   │   │   ├── client.js.map
 │   │   │   ├── funcs
+│   │   │   │   ├── createCloseProcess.d.ts
+│   │   │   │   ├── createCloseProcess.js
+│   │   │   │   ├── createCloseProcess.js.map
+│   │   │   │   ├── createTicket.d.ts
 │   │   │   │   ├── createTicketInfo.d.ts
 │   │   │   │   ├── createTicketInfo.js
 │   │   │   │   ├── createTicketInfo.js.map
+│   │   │   │   ├── createTicket.js
+│   │   │   │   ├── createTicket.js.map
+│   │   │   │   ├── deleteTicketInfo.d.ts
+│   │   │   │   ├── deleteTicketInfo.js
+│   │   │   │   ├── deleteTicketInfo.js.map
+│   │   │   │   ├── getCloseProcess.d.ts
+│   │   │   │   ├── getCloseProcess.js
+│   │   │   │   ├── getCloseProcess.js.map
+│   │   │   │   ├── getTicket.d.ts
 │   │   │   │   ├── getTicketinfo.d.ts
 │   │   │   │   ├── getTicketinfo.js
 │   │   │   │   ├── getTicketinfo.js.map
-│   │   │   │   ├── getWelcomeMessage.d.ts
-│   │   │   │   ├── getWelcomeMessage.js
-│   │   │   │   ├── getWelcomeMessage.js.map
+│   │   │   │   ├── getTicket.js
+│   │   │   │   ├── getTicket.js.map
 │   │   │   │   ├── index.d.ts
 │   │   │   │   ├── index.js
 │   │   │   │   ├── index.js.map
+│   │   │   │   ├── updateCloseProcess.d.ts
+│   │   │   │   ├── updateCloseProcess.js
+│   │   │   │   ├── updateCloseProcess.js.map
+│   │   │   │   ├── updateTicket.d.ts
 │   │   │   │   ├── updateTicketinfo.d.ts
 │   │   │   │   ├── updateTicketinfo.js
 │   │   │   │   ├── updateTicketinfo.js.map
+│   │   │   │   ├── updateTicket.js
+│   │   │   │   ├── updateTicket.js.map
 │   │   │   │   ├── utils.d.ts
 │   │   │   │   ├── utils.js
 │   │   │   │   └── utils.js.map
@@ -81,32 +187,45 @@
 │   │   │   ├── index.d.ts
 │   │   │   ├── index.js
 │   │   │   ├── index.js.map
+│   │   │   ├── processHandmeid.d.ts
+│   │   │   ├── processHandmeid.js
+│   │   │   ├── processHandmeid.js.map
 │   │   │   ├── schema.d.ts
 │   │   │   ├── schema.js
 │   │   │   └── schema.js.map
 │   │   ├── drizzle
 │   │   │   ├── 0000_example_build.sql
+│   │   │   ├── 0001_example_build.sql
 │   │   │   └── meta
 │   │   │       ├── 0000_snapshot.json
+│   │   │       ├── 0001_snapshot.json
 │   │   │       └── _journal.json
 │   │   ├── drizzle.config.ts
 │   │   ├── node_modules
-│   │   │   ├── @ticket
-│   │   │   │   └── lib -> ../../../lib
 │   │   │   ├── drizzle-kit -> ../../../node_modules/.pnpm/drizzle-kit@0.31.8/node_modules/drizzle-kit
 │   │   │   ├── drizzle-orm -> ../../../node_modules/.pnpm/drizzle-orm@0.43.1_@types+pg@8.15.6_pg@8.16.3/node_modules/drizzle-orm
+│   │   │   ├── @ticket
+│   │   │   │   └── lib -> ../../../lib
 │   │   │   └── typescript -> ../../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript
 │   │   ├── package.json
 │   │   ├── src
 │   │   │   ├── client.ts
 │   │   │   ├── funcs
+│   │   │   │   ├── createCloseProcess.ts
 │   │   │   │   ├── createTicketInfo.ts
+│   │   │   │   ├── createTicket.ts
+│   │   │   │   ├── deleteTicketInfo.ts
+│   │   │   │   ├── getCloseProcess.ts
 │   │   │   │   ├── getTicketinfo.ts
+│   │   │   │   ├── getTicket.ts
 │   │   │   │   ├── index.ts
+│   │   │   │   ├── updateCloseProcess.ts
 │   │   │   │   ├── updateTicketinfo.ts
+│   │   │   │   ├── updateTicket.ts
 │   │   │   │   └── utils.ts
 │   │   │   ├── handmeid.ts
 │   │   │   ├── index.ts
+│   │   │   ├── processHandmeid.ts
 │   │   │   └── schema.ts
 │   │   └── tsconfig.json
 │   └── lib
@@ -176,4 +295,4 @@
 ├── pnpm-workspace.yaml
 └── tree.txt
 
-50 directories, 127 files
+66 directories, 230 files

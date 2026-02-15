@@ -91,7 +91,11 @@ export const discordMessageButtonRowSchema = z.object({
 	customId: z.string().max(DISCORD_MESSAGE_LIMITS.buttonCustomId).min(1),
 	url: z.string().max(DISCORD_MESSAGE_LIMITS.buttonUrl).optional(),
 	disabled: z.boolean().optional(),
+	buttonName: z.string(),
 });
+export type DiscordMessageButtonRow = z.infer<
+	typeof discordMessageButtonRowSchema
+>;
 
 export const discordMessageSelectOptionSchema = z.object({
 	label: z.string().max(DISCORD_MESSAGE_LIMITS.buttonLabel),
