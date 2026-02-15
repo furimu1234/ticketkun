@@ -39,7 +39,7 @@ export const runClient = async (client: Client) => {
 			'../../db/drizzle',
 		),
 		migrationsSchema: path.resolve(path.dirname(__filename), '../../db/schema'),
-	});
+	}).catch(() => null);
 	client.login(getEnv('TOKEN')).catch((e) => {
 		console.error('❌ Login failed:', e);
 		process.exit(1);
