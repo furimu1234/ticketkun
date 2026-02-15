@@ -7,7 +7,6 @@ import {
 	SlashCommandChannelOption,
 	SlashCommandStringOption,
 } from 'discord.js';
-
 import { container } from '../container';
 import { makeEditMainPanel, makeEditTicketProcess } from '../settingPanel';
 
@@ -72,12 +71,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 			if (!message.embeds) return [];
 
 			const title = message.embeds[0].title ?? '';
+			const description = message.embeds[0].description ?? '';
 			const content = message.content ?? '';
 
 			if (title.length > 0) {
 				name = title;
 			} else if (content.length > 0) {
 				name = content;
+			} else if (description.length > 0) {
+				name = description;
 			}
 
 			if (message.rows?.version === 1) {
