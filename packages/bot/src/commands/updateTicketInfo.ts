@@ -79,7 +79,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 			} else if (content.length > 0) {
 				name = content;
 			} else if (description.length > 0) {
-				name = description.slice(1, 20);
+				name = description.slice(0, 20);
 			}
 
 			if (message.rows?.version === 1) {
